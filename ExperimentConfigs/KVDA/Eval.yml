@@ -1,0 +1,306 @@
+seed: 44
+episodes: 2000
+executable_dry_run: ./cmake-build-debug/KVDADebug
+executable: ./cmake-build-debug/KVDARelease
+
+agents:
+
+  - deterministic:
+      agent_type: oga
+      agent_args:
+        iterations: [100,200,500,1000]
+        expfac: [0.5,1,2,4,8,16]
+        K: [3]
+        smart_reward_handling: [0,1]
+
+  - deterministic_eps_a:
+      agent_type: oga
+      agent_args:
+        iterations: [100,200,500,1000]
+        expfac: [0.5,1,2,4,8,16]
+        K: [3]
+        eps_a:
+          daa: [ 999999 ]
+          dwlp: [5,10,20,999999]
+          drfbe: [50,100,200,999999]
+          dwf: [5,10,100,999999]
+          dpushyl: [2,5,10,999999]
+          dst: [ 2,3,999999 ]
+          dtam: [ 0.5,1.0,999999 ]
+          drecon: [ 0.5,1.0,999999 ]
+          dman: [ 10,20,999999 ]
+          hc4: [ 1,5,10,999999 ]
+          hoth: [5,10,20,999999]
+          hcon: [10,20,30,999999]
+          default: [ 1,2,999999 ]
+
+  - smart_reward:
+      agent_type: oga
+      agent_args:
+        iterations: [100,1000]
+        expfac: [0.5,1,2,4,8,16]
+        K: [3]
+        eps_t: [0,0.4,0.8,1.2,1.6]
+        smart_reward_handling: [1]
+        group_partially_expanded_states: [0,1]
+
+  - oga_eps:
+      agent_type: oga
+      agent_args:
+        iterations: [100,1000]
+        expfac: [0.5,1,2,4,8,16]
+        K: [3]
+        eps_a:
+          aa: [0,999999]
+          st: [0,2,3,999999]
+          tam: [0,0.5,1.0,999999]
+          recon: [0,0.5,1.0,999999]
+          man: [0,10,20,999999]
+          default: [0,1,2,999999]
+        eps_t: [0,0.4,0.8,1.2,1.6]
+        group_partially_expanded_states: [0,1]
+
+models:
+
+  - hc4:
+      model_type: mptomdp
+      model_args:
+        model_type: heuristicsasreward
+        model_args: 'model_type:c4,model_args:zero_sum?1'
+        deterministic_opponents: 1
+        player: 0
+        agents: 1:osla
+      horizons: [200,50]
+
+
+  - hpus:
+      model_type: mptomdp
+      model_args:
+        model_type: heuristicsasreward
+        model_args: 'model_type:pus,model_args:zero_sum?1;map?standard.txt'
+        deterministic_opponents: 1
+        player: 0
+        agents: 1:osla
+      horizons: [200,50]
+      required_conf_range: 0.2
+
+  - hcon:
+      model_type: mptomdp
+      model_args:
+        model_type: heuristicsasreward
+        model_args: 'model_type:con,model_args:zero_sum?1;arena_size?10'
+        deterministic_opponents: 1
+        player: 0
+        agents: 1:osla
+      horizons: [ 200,50 ]
+      required_conf_range: 1
+
+  - hoth:
+      model_type: mptomdp
+      model_args:
+        model_type: heuristicsasreward
+        model_args: 'model_type:oth,model_args:zero_sum?1'
+        deterministic_opponents: 1
+        player: 0
+        agents: 1:osla
+      horizons: [200,50]
+      required_conf_range: 2
+
+
+
+  - dwlp:
+      model_type: determinization
+      model_args:
+        model_type: wlp
+        model_args: 'map:./resources/WildlifeSetups/4_IPPC.txt'
+
+  - dpushyl:
+      model_type: determinization
+      model_args:
+        model_type: pushyl
+        model_args: 'map:./resources/DiceProbs/10_IPPC.txt'
+      required_conf_range: 10
+
+  - dwf:
+      model_type: determinization
+      model_args:
+        model_type: wf
+        model_args: 'map:./resources/WildfireSetups/1_IPPC.txt'
+      required_conf_range: 40
+
+  - drfbe:
+      model_type: determinization
+      model_args:
+        model_type: rfbe
+        model_args: 'map:./resources/RedFinnedBlueEyesMaps/1_IPPC.txt,deterministic_spread: 0'
+      required_conf_range: 200
+
+
+  - dele:
+      model_type: determinization
+      model_args:
+        model_type: ele
+        model_args: 'map:./resources/ElevatorSetups/10_IPPC.txt'
+      required_conf_range: 1.0
+
+  - dsa:
+      model_type : determinization
+      model_args:
+        model_type: sa
+        model_args: 'map:./resources/SysAdminTopologies/4_Anand.txt'
+
+  - dgol:
+      model_type: determinization
+      model_args:
+        model_type: gol
+        model_args: 'map:./resources/GameOfLifeMaps/3_Anand.txt'
+
+  - daa:
+      model_type: determinization
+      model_args:
+        model_type: aa
+        model_args: 'map:./resources/AcademicAdvisingCourses/2_Anand.txt,dense_rewards:0'
+
+
+  - dtam:
+      model_type: determinization
+      model_args:
+        model_type: tam
+        model_args: 'map:./resources/TamariskMaps/2_IPPC.txt'
+
+  - drecon:
+      model_type: determinization
+      model_args:
+        model_type: recon
+        model_args: 'map:./resources/CooperativeReconSetups/3_IPPC.txt'
+
+  - deo:
+      model_type: determinization
+      model_args:
+        model_type: eo
+        model_args: 'map:./resources/EarthObservationMaps/1_IPPC.txt'
+
+  - dman:
+      model_type: determinization
+      model_args:
+        model_type: man
+        model_args: 'map:./resources/ManufacturerSetups/3_IPPC.txt'
+
+  - dsw_15:
+      model_type: determinization
+      model_args:
+        model_type: sw
+        model_args: 'size: 15'
+
+  - dst:
+      model_type: determinization
+      model_args:
+        model_type: st
+        model_args: 'map:./resources/SkillsTeachingSkills/5_IPPC.txt'
+      required_conf_range: 10
+
+  - dtr:
+      model_type: determinization
+      model_args:
+        model_type: tr
+        model_args: 'map:./resources/TrafficModels/1_IPPC.txt'
+
+  - dsaving:
+      model_type: determinization
+      model_args:
+        model_type: saving
+        model_args: 'p:4,t:4'
+
+#########################################
+
+  - wf:
+      model_type: wf
+      model_args:
+        map: ./resources/WildfireSetups/1_IPPC.txt
+
+  - rfbe:
+      model_type: rfbe
+      model_args:
+        map: ./resources/RedFinnedBlueEyesMaps/1_IPPC.txt
+        deterministic_spread: 0
+
+  - ele:
+      model_type: ele
+      model_args:
+        map: ./resources/ElevatorSetups/10_IPPC.txt
+
+  - ct:
+      model_type: ct
+      model_args:
+        idle_action: 1
+        width: 4
+        height: 3
+        spawn_rate: 0.5
+
+  - sa:
+      model_type : sa
+      model_args:
+        map: ./resources/SysAdminTopologies/4_Anand.txt
+
+  - gol:
+      model_type: gol
+      model_args:
+        map: ./resources/GameOfLifeMaps/3_Anand.txt
+
+  - aa:
+      model_type: aa
+      model_args:
+        map: ./resources/AcademicAdvisingCourses/2_Anand.txt
+        dense_rewards: 0
+
+  - tam:
+      model_type: tam
+      model_args:
+        map: ./resources/TamariskMaps/2_IPPC.txt
+
+  - recon:
+      model_type: recon
+      model_args:
+        map: ./resources/CooperativeReconSetups/3_IPPC.txt
+
+  - eo:
+      model_type: eo
+      model_args:
+        map: ./resources/EarthObservationMaps/1_IPPC.txt
+
+  - man:
+      model_type: man
+      model_args:
+        map: ./resources/ManufacturerSetups/3_IPPC.txt
+
+  - sw_15:
+      model_type: sw
+      model_args:
+        size: 15
+
+  - st:
+      model_type: st
+      model_args:
+        map: ./resources/SkillsTeachingSkills/5_IPPC.txt
+
+  - tr:
+      model_type: tr
+      model_args:
+        map: ./resources/TrafficModels/1_IPPC.txt
+
+  - saving:
+      model_type: saving
+      model_args:
+        p: 4
+        t: 4
+
+
+pairings:
+
+  - pair:
+      - agents: [smart_reward,oga_eps]
+      - models: [recon,man,tam,st,gol,aa,sa,tr,eo,sw_15,saving]
+
+  - pair:
+      - agents: [deterministic,deterministic_eps_a]
+      - models: [hoth,hc4,hpus,hcon,dwlp,dpushyl,drecon,dman,dtam,dst,dgol,daa,dsa,dtr,deo,dsw_15,dele,dwf,drfbe,dsaving]
