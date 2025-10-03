@@ -7,10 +7,25 @@ This is the repository accompanying the paper "Grouping nodes with known value d
 
 ## Abstract
 
-A core challenge of Monte Carlo Tree Search (MCTS) is
-its sample efficiency which can be addressed by
-building and using state and/or state-action pair abstractions in parallel to the tree search such that information can be shared among nodes of the same layer. On the Go Abstractions in Upper Confidence bounds applied to Trees (OGA-UCT) is the state-of-the-art MCTS abstraction algorithm for deterministic environments that builds its abstraction using the Abstractions of State-Action Pairs (ASAP) framework which aims to detect states and state-action pairs with the same value under optimal play by analysing the search graph. ASAP, however, requires two state-action pairs to have the same immediate reward which is a rigid condition that limits the number of abstractions that can be found and thereby the sample efficiency. In this paper, we break with the paradigm of grouping value-equivalent states or state-action pairs and instead group states and state-action pairs with possibly different values as long as the difference between their values can be inferred. We call this abstraction framework Known Value Difference Abstractions (KVDA) which infers the value differences by analysis of the immediate rewards and modify OGA-UCT to use this framework instead. The modification is called KVDA-UCT which detects significantly more abstractions than OGA-UCT, introduces no additional parameter and outperforms OGA-UCT on a variety of deterministic environments and parameter settings.
-
+A core challenge of Monte Carlo Tree Search (MCTS) is its sample efficiency,
+which can be addressed by building and using state and/or state-action pair abstractions
+in parallel to the tree search, such that information can be shared among
+nodes of the same layer. On the Go Abstractions in Upper Confidence bounds
+applied to Trees (OGA-UCT) is the state-of-the-art MCTS abstraction algorithm
+for deterministic environments that builds its abstraction using the Abstractions
+of State-Action Pairs (ASAP) framework, which aims to detect states and stateaction
+pairs with the same value under optimal play by analysing the search graph.
+ASAP, however, requires two state-action pairs to have the same immediate reward,
+which is a rigid condition that limits the number of abstractions that can be
+found and thereby the sample efficiency. In this paper, we break with the paradigm
+of grouping value-equivalent states or state-action pairs and instead group states
+and state-action pairs with possibly different values as long as the difference between
+their values can be inferred. We call this abstraction framework Known
+Value Difference Abstractions (KVDA), which infers the value differences by
+analysis of the immediate rewards and modifies OGA-UCT to use this framework
+instead. The modification is called KVDA-UCT, which detects significantly more
+abstractions than OGA-UCT, introduces no additional parameter, and outperforms
+OGA-UCT on a variety of deterministic environments and parameter settings.
 ## Installation
 
 To build the project from source, you will need a C++ compiler supporting the C++20 standard or higher (a lower standard probably works too but we have not tested that). The project
