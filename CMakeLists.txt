@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.16.3)
 
 set(CMAKE_CXX_STANDARD 20)
 
-project(kvda LANGUAGES CXX)
+project(KVDA LANGUAGES CXX)
 
 set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wpedantic -Wno-unused-parameter")
 
@@ -169,22 +169,22 @@ endif()
 set_target_properties(liblink PROPERTIES OUTPUT_NAME "liblink")
 
 #Debug executable
-add_executable(kvdaDebug ${SOURCE_FILES})
-target_compile_options(kvdaDebug PRIVATE
+add_executable(KVDADebug ${SOURCE_FILES})
+target_compile_options(KVDADebug PRIVATE
         ${CMAKE_CXX_FLAGS_DEBUG}   # typical debug flags (-O0 -g for gcc/clang)
 )
-target_link_options(kvdaDebug PRIVATE
+target_link_options(KVDADebug PRIVATE
         ${CMAKE_EXE_LINKER_FLAGS}         # global linker flags
         ${CMAKE_EXE_LINKER_FLAGS_DEBUG}   # typical debug linker flags
 )
 
 #Release executable
-add_executable(kvdaRelease ${SOURCE_FILES})
-target_compile_options(kvdaRelease PRIVATE
+add_executable(KVDARelease ${SOURCE_FILES})
+target_compile_options(KVDARelease PRIVATE
         -O3
         -DNDEBUG
 )
-target_link_options(kvdaRelease PRIVATE
+target_link_options(KVDARelease PRIVATE
         ${CMAKE_EXE_LINKER_FLAGS}
         ${CMAKE_EXE_LINKER_FLAGS_RELEASE}
 )
