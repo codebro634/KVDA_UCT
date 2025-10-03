@@ -8,9 +8,10 @@ Model::~Model(){
         delete original_model;
 }
 
-Model::Model(ABS::Model* original_model,  bool free_ground_model) {
+Model::Model(ABS::Model* original_model,  bool free_ground_model, double constant_reward) {
     this->original_model = original_model;
     this->free_ground_model = free_ground_model;
+    this->const_reward = constant_reward;
 }
 
 void Model::printState(ABS::Gamestate* state) {
@@ -47,6 +48,6 @@ std::pair<std::vector<double>,double> Model::applyAction_(ABS::Gamestate* uncast
     assert (prob == 1);
     auto new_v = original_model->heuristicsValue(uncasted_state);
     for (int i = 0; i < (int)rewards.size(); i++)
-        rewards[i] = new_v[i] - old_v[i];
+        rewards[i] = this->const_reward + new_v[i] - old_v[i];
     return {rewards, prob};
 }

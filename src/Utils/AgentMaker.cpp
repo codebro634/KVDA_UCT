@@ -1,5 +1,6 @@
 #include "../../include/Utils/AgentMaker.h"
 #include "../../include/Agents/Oga/OgaAgent.h"
+#include "../../include/Agents/Mcts/MctsAgent.h"
 #include "../../include/Games/TwoPlayerGames/Pusher.h"
 #include "../../include/Agents/RandomAgent.h"
 
@@ -9,8 +10,10 @@
 
 
 Agent* getDefaultAgent(bool strong){
-    assert(!strong);
-    return new RandomAgent();
+    if (strong)
+        return new Mcts::MctsAgent({{500, "iterations"}, {4}, 1.0, 1, -1, true, true});
+    else
+       return new RandomAgent();
 }
 
 std::string extraArgs(std::map<std::string, std::string>& given_args, const std::set<std::string>& acceptable_args){
@@ -41,12 +44,50 @@ Agent* getAgent(const std::string& agent_type, const std::vector<std::string>& a
         acceptable_args = {};
         agent =  new RandomAgent();
     }
+    else if(agent_type == "mcts")
+    {
+        assert (agent_args.contains("iterations"));
+        if(agent_args.contains("wirsa"))
+            assert (agent_args.contains("a") && agent_args.contains("b"));
+        acceptable_args = {"iterations", "rollout_length", "discount", "num_rollouts", "dag", "dynamic_exp_factor", "expfacs", "wirsa", "a", "b", "puct", "max_backup"};
+
+        int iterations = std::stoi(agent_args["iterations"]);
+        int rollout_length = agent_args.find("rollout_length") == agent_args.end() ? -1 : std::stoi(agent_args["rollout_length"]);
+        double discount = agent_args.find("discount") == agent_args.end() ? 1.0 : std::stod(agent_args["discount"]);
+        int num_rollouts = agent_args.find("num_rollouts") == agent_args.end() ? 1: std::stoi(agent_args["num_rollouts"]);
+        bool dag = agent_args.find("dag") == agent_args.end() ? false : std::stoi(agent_args["dag"]);
+        bool dynamic_exp_factor = agent_args.find("dynamic_exp_factor") == agent_args.end() ? false : std::stoi(agent_args["dynamic_exp_factor"]);
+        bool wirsa = agent_args.find("wirsa") == agent_args.end() ? false : std::stoi(agent_args["wirsa"]);
+        double a = agent_args.find("a") == agent_args.end() ? 0.0 : std::stod(agent_args["a"]);
+        double b = agent_args.find("b") == agent_args.end() ? 0.0 : std::stod(agent_args["b"]);
+        std::string exp_facs = agent_args.find("expfacs") == agent_args.end() ? "1" : agent_args["expfacs"];
+        std::vector<double> expfac;
+        std::stringstream ss(exp_facs);
+        double i;
+        while (ss >> i){
+            expfac.push_back(i);
+            if (ss.peek() == ';')
+                ss.ignore();
+        }
+        bool max_backup = agent_args.find("max_backup") == agent_args.end() ? false : std::stoi(agent_args["max_backup"]);
+        bool puct = agent_args.find("puct") == agent_args.end() ? false : std::stoi(agent_args["puct"]);
+
+        auto args = Mcts::MctsArgs{.budget = {iterations, "iterations"}, .exploration_parameters = expfac, .discount = discount,
+            .num_rollouts = num_rollouts,
+            .rollout_length = rollout_length,
+            .dag=dag,
+            .dynamic_exploration_factor=dynamic_exp_factor,
+            .max_backup = max_backup,
+            .wirsa = wirsa,
+            .a=a,.b=b, .puct = puct};
+        agent =  new Mcts::MctsAgent(args);
+    }
      else if (agent_type == "oga") {
         assert (agent_args.contains("iterations"));
         acceptable_args = {"iterations", "discount", "expfac", "K","group_terminal_states", "group_partially_expanded_states", "equiv_chance",
-            "consider_missing_outcomes", "smart_reward_handling", "q_abs_alg", "track_statistics",
-            "partial_expansion_group_threshold", "ignore_partially_expanded_states", "eps_a", "eps_t", "abs_alg", "alpha",
-            "num_rollouts", "rollout_length"};
+            "consider_missing_outcomes", "policy_nn_path", "value_nn_path", "smart_reward_handling", "q_abs_alg", "track_statistics",
+            "partial_expansion_group_threshold", "ignore_partially_expanded_states", "eps_a", "eps_t", "abs_alg", "filter_bonus", "confidence", "in_abs_policy", "alpha",
+            "drop_check_point", "drop_threshold", "drop_confidence", "drop_at_visits", "num_rollouts", "rollout_length", "state_abs_min_visits", "state_abs_top_n_matches"};
 
         int iterations = std::stoi(agent_args["iterations"]);
         double discount = agent_args.find("discount") == agent_args.end() ? 1.0 : std::stod(agent_args["discount"]);
@@ -65,10 +106,10 @@ Agent* getAgent(const std::string& agent_type, const std::vector<std::string>& a
         bool track_statistics = agent_args.find("track_statistics") == agent_args.end() ? false : std::stoi(agent_args["track_statistics"]);
 
          std::string q_abs_alg = agent_args.find("q_abs_alg") == agent_args.end() ? "eps" : agent_args["q_abs_alg"];
-         std::string in_abs_policy = agent_args.find("in_abs_policy") == agent_args.end() ? "random" : agent_args["in_abs_policy"];
-        std::string abs_alg = agent_args.find("abs_alg") == agent_args.end() ? "asap" : agent_args["abs_alg"];
+         std::string abs_alg = agent_args.find("abs_alg") == agent_args.end() ? "asap" : agent_args["abs_alg"];
         bool smart_reward_handling = agent_args.find("smart_reward_handling") == agent_args.end() ? false : std::stoi(agent_args["smart_reward_handling"]);
-
+         auto policy_nn_path = agent_args.find("policy_nn_path") == agent_args.end() ? "" : agent_args["policy_nn_path"];
+         auto value_nn_path = agent_args.find("value_nn_path") == agent_args.end() ? "" : agent_args["value_nn_path"];
 
         auto args = OGA::OgaArgs{
             .budget = {iterations, "iterations"},

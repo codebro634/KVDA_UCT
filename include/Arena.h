@@ -21,7 +21,7 @@ enum OutputMode{
     CSV_OMIT_TIMES
 };
 
-std::vector<std::vector<double>> playGames(ABS::Model& model,
+std::vector<std::vector<double>> playGames(ABS::Model* model,
     int num_maps,
     std::vector<Agent*> agents,
     std::mt19937& rng,

@@ -17,17 +17,19 @@ size_t Gamestate::hash() const{
 }
 
 Model::~Model(){
-    delete original_model;
+    if (free_ground_model)
+        delete original_model;
     for(auto& [_,agent] : agents)
         delete agent;
 }
 
-Model::Model(ABS::Model* original_model,std::map<int,Agent*> agents, double discount, int player, bool deterministic_opponents){
+Model::Model(ABS::Model* original_model,std::map<int,Agent*> agents, double discount, int player, bool deterministic_opponents, bool free_ground_model){
     this->original_model = original_model;
     this->agents = agents;
     this->discount = discount;
     this->player = player;
     this->deterministic_opponents = deterministic_opponents;
+    this->free_ground_model = free_ground_model;
 
     for (int i = 0; i < original_model->getNumPlayers(); i++){
         assert (i == player || agents.contains(i));

@@ -12,7 +12,7 @@ namespace HEURISTICSASREWARD
     class Model: public ABS::Model
     {
     public:
-        explicit Model(ABS::Model* original_model, bool free_ground_model);
+        explicit Model(ABS::Model* original_model, bool free_ground_model, double constant_reward=0);
         ~Model() override;
         void printState(ABS::Gamestate* state) override;
         ABS::Gamestate* getInitialState(std::mt19937& rng) override;
@@ -49,6 +49,7 @@ namespace HEURISTICSASREWARD
     private:
         ABS::Model* original_model;
         bool free_ground_model;
+        double const_reward;
 
         std::pair<std::vector<double>,double> applyAction_(ABS::Gamestate* uncasted_state, int action, std::mt19937& rng, std::vector<std::pair<int,int>>* decision_outcomes) override;
         std::vector<int> getActions_(ABS::Gamestate* uncasted_state) override;

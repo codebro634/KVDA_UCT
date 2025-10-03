@@ -26,7 +26,7 @@ void Model::getObs(ABS::Gamestate* uncasted_state, int* obs) {
 }
 
 [[nodiscard]] std::vector<int> Model::actionShape() const {
-    return {1+map_height*map_height};
+    return {1+map_height*map_width};
 }
 
 int Model::encodeAction(int* decoded_action) {

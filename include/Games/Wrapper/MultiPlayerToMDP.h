@@ -28,7 +28,7 @@ namespace MPTOMDP
     {
     public:
         ~Model() override;
-        explicit Model(ABS::Model* original_model,std::map<int,Agent*> agents, double discount, int player, bool deterministic_opponents);
+        explicit Model(ABS::Model* original_model,std::map<int,Agent*> agents, double discount, int player, bool deterministic_opponents, bool free_ground_model);
         void printState(ABS::Gamestate* state) override;
         ABS::Gamestate* getInitialState(std::mt19937& rng) override;
         ABS::Gamestate* getInitialState(int num) override;
@@ -62,6 +62,7 @@ namespace MPTOMDP
         double discount;
         int player;
         bool deterministic_opponents;
+        bool free_ground_model;
 
         std::pair<double,double> playTillNextTurn(Gamestate* state, std::mt19937& rng);
 

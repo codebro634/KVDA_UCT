@@ -1,59 +1,63 @@
 #define DEBUG
 
 #include <random>
-#include "../include/Utils/ValueIteration.h"
 #include "../include/Arena.h"
 #include "../include/Utils/AgentMaker.h"
 #include "../include/Utils/ModelMaker.h"
-#include "../include/Games/MDPs/Traffic.h"
-#include "../include/Games/Wrapper/FiniteHorizon.h"
-#include "../include/Utils/Argparse.h"
-#include "../include/Utils/Distributions.h"
-
-#include "../include/Games/MDPs/GameOfLife.h"
 #include "../include/Agents/Oga/OgaAgent.h"
+#include "../include/Agents/Mcts/MctsAgent.h"
+#include "../include/Agents/RandomAgent.h"
+#include "../include/Games/MDPs/Traffic.h"
+#include "../include/Agents/HumanAgent.h"
+#include "../include/Agents/OneStepLookahead.h"
+#include "../include/Agents/SparseSamplingAgent.h"
+#include "../include/Agents/Mcts/MctsAgent.h"
+#include "../include/Games/TwoPlayerGames/TicTacToe.h"
+#include "../include/Games/MDPs/SailingWind.h"
+#include "../include/Games/TwoPlayerGames/Chess.h"
+#include "../include/Games/TwoPlayerGames/Constrictor.h"
+#include "../include/Games/TwoPlayerGames/Pylos.h"
+#include "../include/Games/TwoPlayerGames/Quarto.h"
+#include "../include/Games/MDPs/Navigation.h"
+#include "../include/Games/MDPs/SkillsTeaching.h"
+#include "../include/Games/MDPs/PushYourLuck.h"
+#include "../include/Games/MDPs/SysAdmin.h"
+#include "../include/Games/MDPs/TriangleTireworld.h"
+#include "../include/Games/Wrapper/MultiPlayerToMDP.h"
+#include "../include/Games/MDPs/RedFinnedBlueEye.h"
+#include "../include/Games/MDPs/EarthObservation.h"
+#include "../include/Games/MDPs/WildlifePreserve.h"
+#include "../include/Games/MDPs/Manufacturer.h"
+#include "../include/Games/MDPs/GameOfLife.h"
+#include "../include/Games/MDPs/Wildfire.h"
+#include "../include/Games/MDPs/JoinFive.h"
+#include "../include/Games/MDPs/Tamarisk.h"
+#include "../include/Games/TwoPlayerGames/CaptureTheFlag.h"
+#include "../include/Games/Wrapper/FiniteHorizon.h"
+#include "../include/Games/MDPs/Saving.h"
+#include "../include/Games/MDPs/GraphTraversal.h"
+#include "../include/Games/MDPs/Elevators.h"
+#include "../include/Games/MDPs/RaceTrack.h"
+#include "../include/Games/MDPs/CrossingTraffic.h"
+#include "../include/Games/TwoPlayerGames/KillTheKing.h"
+#include "../include/Games/MDPs/AcademicAdvising.h"
+#include "../include/Games/TwoPlayerGames/Constrictor.h"
+#include "../include/Games/MDPs/MultiArmedBandit.h"
+#include "../include/Games/MDPs/CooperativeRecon.h"
+#include "../include/Games/TwoPlayerGames/NumbersRace.h"
+#include "../include/Games/MDPs/ToySoccer.h"
+#include "../include/Utils/Argparse.h"
+#include "../include/Games/TwoPlayerGames/Connect4.h"
+#include "../include/Games/TwoPlayerGames/Othello.h"
+#include "../include/Games/Wrapper/RandomStart.h"
+#include "../include/Games/Wrapper/Determinization.h"
+#include "../include/Games/Wrapper/HeuristicsAsReward.h"
+#include "../include/Utils/Distributions.h"
+#include "../include/Utils/ValueIteration.h"
+
+#include <cstdlib>
 
 void debug(){
-
-    auto Q_map = std::unordered_map<std::pair<FINITEH::Gamestate*,int> , double, VALUE_IT::QMapHash, VALUE_IT::QMapCompare>{};
-    const int seed = 42;
-    std::mt19937 rng(static_cast<unsigned int>(seed));
-
-    std::vector<std::pair<std::string,ABS::Model*>> model_list = {};
-    model_list.emplace_back("gol", new  GOL::Model("../resources/GameOfLifeMaps/3_Anand.txt", GOL::ActionMode::SAVE_ONLY));
-
-    auto oga = OGA::OgaAgent({
-           .budget={
-               1000,
-               "iterations"
-           },
-           .recency_count_limit=3,
-           .exploration_parameter=1.0,
-           .discount=1.0,
-           .num_rollouts = 1,
-            .rollout_length = -1,
-           .behavior_flags={
-               .group_terminal_states=true,
-               .group_partially_expanded_states=false,
-               .partial_expansion_group_threshold=999999,
-               .q_abs_alg = "eps",
-               .eps_a = 0,
-               .eps_t = 0,
-               .consider_missing_outcomes = false,
-               .alpha = 0.0,
-               .equiv_chance = 1.0,
-               .state_abs_alg = "asap",
-               .smart_reward_handling = true,
-           },
-        .track_statistics = false,
-        .distribution_agent = nullptr,
-       });
-
-
-    for (auto & i : model_list) { //
-        std::cout << "Model:" << i.first << std::endl;
-        auto results = playGames((*i.second), 10, {&oga}, rng, VERBOSE, {50,50},  false, true, 99999999, &Q_map);
-    }
 
 }
 
@@ -199,7 +203,7 @@ int main(const int argc, char **argv) {
 
     const auto conf_range = program.get<double>("--required_conf_range");
     const auto rng_save_path = program.get<std::string>("--rng_save_path");
-    playGames(*model, program.get<int>("--n_games"),
+    playGames(model, program.get<int>("--n_games"),
         agent_list, rng, program.get<bool>("--csv") ? ( program.get<bool>("--omit_times")? CSV_OMIT_TIMES : CSV) : VERBOSE, horizons,
         planning_beyond_execution_horizon, random_init_state,conf_range, &Q_map, rng_save_path, program.get<int>("--episode_num_offset"));
 

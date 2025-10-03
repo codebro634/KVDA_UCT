@@ -56,7 +56,7 @@ void outputStats(OutputMode& output_mode,
             conf_range = distr::confidence_interval(times[j].first, times[j].second, num_actions[j], DEFAULT_CONFIDENCE, 2).second - times[j].first / num_actions[j];
             std::cout << "Player " << j << " avg time: " << times[j].first/num_actions[j] << " +- " << conf_range <<  std::endl;
 
-            std::cout << "Player " << j << " played actions: ";
+            std::cout << "Player " << j << " played " << played_actions[j].size() << " actions: ";
             for (size_t action_idx = 0; action_idx < played_actions[j].size(); action_idx++)
                 std::cout << played_actions[j][action_idx] << " ";
             std::cout << std::endl;
@@ -158,7 +158,7 @@ void outputCsvHeader(int players, bool omit_times)
 }
 
 std::vector<std::vector<double>> playGames(
-    ABS::Model& unwrapped_model,
+    ABS::Model* unwrapped_model,
     int num_maps,
     std::vector<Agent*> agents,
     std::mt19937& rng,
@@ -172,7 +172,7 @@ std::vector<std::vector<double>> playGames(
     int episode_num_offset)
 {
 
-    auto model = FINITEH::Model(&unwrapped_model, horizons.first, false);
+    auto model = FINITEH::Model(unwrapped_model, horizons.first, false);
 
     std::vector<std::pair<double,double>> results = std::vector<std::pair<double,double>>(model.getNumPlayers(), {0,0}); //cumulative reward, and cumulative squared reward
     std::vector<double> regrets = std::vector<double>(model.getNumPlayers(), 0);

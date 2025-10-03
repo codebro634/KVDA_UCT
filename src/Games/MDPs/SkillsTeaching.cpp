@@ -22,16 +22,11 @@ void SkillsTeachingModel::getObs(ABS::Gamestate* uncasted_state, int* obs) {
 }
 
 [[nodiscard]] std::vector<int> SkillsTeachingModel::actionShape() const {
-    int size = idling_allowed? 1 : 0;
-    size += 2*skillWeights.size();
-    return {size};
+    return {(int)(2*skillWeights.size()) + 1};
 }
 
 int SkillsTeachingModel::encodeAction(int* decoded_action) {
-    int a = decoded_action[0];
-    if (idling_allowed)
-        a--;
-    return a;
+    return decoded_action[0] - 1;
 }
 
 bool SkillsTeachingState::operator==(const ABS::Gamestate& o) const {

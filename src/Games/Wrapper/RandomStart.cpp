@@ -58,8 +58,11 @@ ABS::Gamestate* Model::getInitialState(std::mt19937& rng){
     state->ground_state = ostate;
     state->free_ground_state = true;
 
-    for (size_t i = 0; i < random_steps; ++i)
+    for (size_t i = 0; i < random_steps; ++i) {
         original_model->applyAction(ostate, random_agent.getAction(original_model,ostate, rng), rng, nullptr);
+        if (ostate->terminal)
+            break;
+    }
 
     state->turn = ostate->turn;
     state->terminal = ostate->terminal; //should be false

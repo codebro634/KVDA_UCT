@@ -1,7 +1,8 @@
-seed: 44
+seed: 42
 episodes: 2000
-executable_dry_run: ./cmake-build-debug/KVDADebug
-executable: ./cmake-build-debug/KVDARelease
+executable_dry_run: ./cmake-build-debug/BenchmarkGamesDebug
+executable: ./cmake-build-debug/BenchmarkGamesRelease
+omit_times: 1
 
 agents:
 
@@ -34,31 +35,37 @@ agents:
           hcon: [10,20,30,999999]
           default: [ 1,2,999999 ]
 
-  - smart_reward:
-      agent_type: oga
-      agent_args:
-        iterations: [100,1000]
-        expfac: [0.5,1,2,4,8,16]
-        K: [3]
-        eps_t: [0,0.4,0.8,1.2,1.6]
-        smart_reward_handling: [1]
-        group_partially_expanded_states: [0,1]
 
   - oga_eps:
       agent_type: oga
       agent_args:
-        iterations: [100,1000]
+        iterations: [100,200,500,1000]
         expfac: [0.5,1,2,4,8,16]
         K: [3]
-        eps_a:
-          aa: [0,999999]
-          st: [0,2,3,999999]
-          tam: [0,0.5,1.0,999999]
-          recon: [0,0.5,1.0,999999]
-          man: [0,10,20,999999]
-          default: [0,1,2,999999]
-        eps_t: [0,0.4,0.8,1.2,1.6]
+        eps_t: [0,0.2,0.4,0.8,1.2,1.6]
         group_partially_expanded_states: [0,1]
+        eps_a:
+          navigation: [ 0,999999 ]
+          trt: [ 0,999999 ]
+          ct: [ 0,999999 ]
+          aa: [ 0,999999 ]
+          st: [ 0,2,3,999999 ]
+          tam: [ 0,0.5,1.0,999999 ]
+          recon: [ 0,0.5,1.0,999999 ]
+          man: [0, 10,20,999999 ]
+          default: [0,1,2,999999 ]
+        smart_reward_handling: [0,1]
+
+  - pruned_oga:
+      agent_type: oga
+      agent_args:
+        iterations: [100,200,500,1000]
+        expfac: [0.5,1,2,4,8,16]
+        K: [3]
+        alpha: [0,0.1,0.2,0.5,0.75,1.0]
+        group_partially_expanded_states: [0,1]
+        smart_reward_handling: [0,1]
+
 
 models:
 
@@ -159,7 +166,7 @@ models:
       model_type: determinization
       model_args:
         model_type: aa
-        model_args: 'map:./resources/AcademicAdvisingCourses/2_Anand.txt,dense_rewards:0'
+        model_args: 'map:./resources/AcademicAdvisingCourses/2_Anand.txt,dense_rewards:1'
 
 
   - dtam:
@@ -213,10 +220,22 @@ models:
 
 #########################################
 
-  - wf:
-      model_type: wf
-      model_args:
-        map: ./resources/WildfireSetups/1_IPPC.txt
+
+#  - wlp:
+#      model_type: wlp
+#      model_args:
+#        map: ./resources/WildlifeSetups/4_IPPC.txt
+#
+#  - pushyl:
+#      model_type: pushyl
+#      model_args:
+#        map: ./resources/DiceProbs/10_IPPC.txt
+#
+
+#  - wf:
+#      model_type: wf
+#      model_args:
+#        map: ./resources/WildfireSetups/1_IPPC.txt
 
   - rfbe:
       model_type: rfbe
@@ -251,7 +270,7 @@ models:
       model_type: aa
       model_args:
         map: ./resources/AcademicAdvisingCourses/2_Anand.txt
-        dense_rewards: 0
+        dense_rewards: 1
 
   - tam:
       model_type: tam
@@ -272,6 +291,16 @@ models:
       model_type: man
       model_args:
         map: ./resources/ManufacturerSetups/3_IPPC.txt
+
+  - navigation:
+      model_type: navigation
+      model_args:
+        map: ./resources/NavigationMaps/3_Anand.txt
+
+  - rt:
+      model_type: rt
+      model_args:
+        map: ./resources/Racetracks/ring-2.track
 
   - sw_15:
       model_type: sw
@@ -294,11 +323,87 @@ models:
         p: 4
         t: 4
 
+  - trt:
+      model_type: trt
+      model_args:
+        map: ./resources/TriangleTireworlds/5_IPPC.txt
+
+#  - ctf:
+#      model_type: ctf
+#      model_args:
+#        zero_sum: 1
+#        map: ./resources/CTFMaps/standard.txt
+#      horizons: [200,50]
+#
+#  - ktk:
+#      model_type: ktk
+#      model_args:
+#        zero_sum: 1
+#        map: ./resources/KTKMaps/standard.txt
+#      horizons: [200,50]
+#
+#  - pus:
+#      model_type: pus
+#      model_args:
+#        zero_sum: 1
+#        map: ./resources/PusherMaps/standard.txt
+#      horizons: [200,50]
+#
+#  - c4:
+#      model_type: c4
+#      model_args:
+#        zero_sum: 1
+#      horizons: [200,50]
+#
+#  - con:
+#      model_type: con
+#      model_args:
+#        zero_sum: 1
+#        arena_size: 10
+#      horizons: [200,50]
+#
+#  - num:
+#      model_type: num
+#      model_args:
+#        zero_sum: 1
+#        goal: 200
+#        max_action: 15
+#      horizons: [200,50]
+#
+#  - oth:
+#      model_type: oth
+#      model_args:
+#        zero_sum: 1
+#      horizons: [200,50]
+#
+#  - pyl:
+#      model_type: pyl
+#      model_args:
+#        zero_sum: 1
+#      horizons: [200,50]
+#
+#  - qua:
+#      model_type: qua
+#      model_args:
+#        zero_sum: 1
+#      horizons: [200,50]
+#
+#  - ttt:
+#      model_type: ttt
+#      model_args:
+#        zero_sum: 1
+#      horizons: [200,50]
+#
+#  - che:
+#      model_type: che
+#      model_args:
+#        zero_sum: 1
+#      horizons: [200,50]
 
 pairings:
 
   - pair:
-      - agents: [smart_reward,oga_eps]
+      - agents: [pruned_oga,oga_eps]
       - models: [recon,man,tam,st,gol,aa,sa,tr,eo,sw_15,saving]
 
   - pair:

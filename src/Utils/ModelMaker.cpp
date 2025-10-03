@@ -1,16 +1,23 @@
 #include "../../include/Utils/ModelMaker.h"
+#include "../../include/Agents/Mcts/MctsAgent.h"
 #include "../../include/Agents/RandomAgent.h"
 #include "../../include/Agents/OneStepLookahead.h"
 #include "../../include/Agents/Agent.h"
 
 #include "../../include/Utils/AgentMaker.h"
 
+ #include "../../include/Games/TwoPlayerGames/TicTacToe.h"
 #include "../../include/Games/TwoPlayerGames/Pusher.h"
 #include "../../include/Games/MDPs/SailingWind.h"
+#include "../../include/Games/TwoPlayerGames/Chess.h"
 #include "../../include/Games/TwoPlayerGames/Constrictor.h"
+#include "../../include/Games/TwoPlayerGames/Pylos.h"
+#include "../../include/Games/TwoPlayerGames/Quarto.h"
+#include "../../include/Games/MDPs/Navigation.h"
 #include "../../include/Games/MDPs/SkillsTeaching.h"
 #include "../../include/Games/MDPs/PushYourLuck.h"
 #include "../../include/Games/MDPs/SysAdmin.h"
+#include "../../include/Games/MDPs/TriangleTireworld.h"
 #include "../../include/Games/Wrapper/MultiPlayerToMDP.h"
 #include "../../include/Games/MDPs/RedFinnedBlueEye.h"
 #include "../../include/Games/MDPs/EarthObservation.h"
@@ -19,17 +26,26 @@
 #include "../../include/Games/MDPs/GameOfLife.h"
 #include "../../include/Games/MDPs/Traffic.h"
 #include "../../include/Games/MDPs/Wildfire.h"
+#include "../../include/Games/MDPs/JoinFive.h"
 #include "../../include/Games/MDPs/Tamarisk.h"
+#include "../../include/Games/TwoPlayerGames/CaptureTheFlag.h"
 #include "../../include/Games/MDPs/Saving.h"
 #include "../../include/Games/MDPs/GraphTraversal.h"
 #include "../../include/Games/MDPs/Elevators.h"
 #include "../../include/Games/MDPs/RaceTrack.h"
+#include "../../include/Games/MDPs/CrossingTraffic.h"
+#include "../../include/Games/TwoPlayerGames/KillTheKing.h"
 #include "../../include/Games/MDPs/AcademicAdvising.h"
+#include "../../include/Games/MDPs/MultiArmedBandit.h"
 #include "../../include/Games/MDPs/CooperativeRecon.h"
+#include "../../include/Games/TwoPlayerGames/NumbersRace.h"
 #include "../../include/Games/MDPs/ToySoccer.h"
 #include "../../include/Games/TwoPlayerGames/Connect4.h"
 #include "../../include/Games/TwoPlayerGames/Othello.h"
-#include "../../include/Games/Wrapper/FiniteHorizon.h"
+#include "../../include/Games/MDPs/BinPacking.h"
+#include "../../include/Games/MDPs/Knapsack.h"
+#include "../../include/Games/MDPs/TravellingSalesPerson.h"
+#include "../../include/Games/MDPs/SupplyChain.h"
 
 #include <map>
 #include <set>
@@ -51,7 +67,7 @@ void checkArguments(std::string model, std::map<std::string, std::string> model_
     model_arg_map["randomstart"] = {{"model_type","model_args", "steps"}, {"model_type", "model_args", "steps"}};
 
     //standard envs
-    model_arg_map["num"] = {{"goal", "max_action", "zero_sum"}, {"zero_sum", "goal", "max_action"}};
+    model_arg_map["num"] = {{"goal", "max_action", "zero_sum"}, {"zero_sum", "goal", "max_action", "one_hot_obs"}};
     model_arg_map["saving"] = { {"p", "t"}, {"p", "t"}};
     model_arg_map["ts"] = { {}, {}};
     model_arg_map["che"] = {{"zero_sum"}, {"zero_sum"}};
@@ -86,6 +102,10 @@ void checkArguments(std::string model, std::map<std::string, std::string> model_
     model_arg_map["tam"] = {{"map"}, {"map"}};
     model_arg_map["recon"] = {{"map"}, {"map"}};
     model_arg_map["navigation"] = {{"map"}, {"map", "idle_action"}};
+    model_arg_map["binpacking"] = {{"setup"}, {"setup"}};
+    model_arg_map["knapsack"] = {{"setup"}, {"setup"}};
+    model_arg_map["tsp"] = {{"map"}, {"map"}};
+    model_arg_map["sc"] = {{"setup"}, {"setup"}};
 
     //check if model exists
     if (!model_arg_map.contains(model)) {
@@ -95,7 +115,7 @@ void checkArguments(std::string model, std::map<std::string, std::string> model_
                      "pushyl (Push Your Luck), rt (Racetrack), rfbe (Red Finned Blue Eye), sw (Sailing Wind), saving (Saving), st (Skill Teaching), sa (SysAdmin), "
                      "tam (Tamarisk), ts (Toy Soccer), tr (Traffic), trt (Triangle Tireworld), wf (Wildfire), "
                      "wlp (Wildlife Preserve), ctf (Capture the Flag), che (Chess), c4 (Connect 4), con (Constrictor), ktk (Kill the King), num (Numbers Race),"
-                     "oth (Othello), pus (Pusher), pyl (Pylos), qua (Quarto), ttt (TicTacToe)" << std::endl;
+                     "oth (Othello), pus (Pusher), pyl (Pylos), qua (Quarto), ttt (TicTacToe), binpacking (Bin-Packing), knapsack (Knapsack), tsp (Travelling Salesperson), sc (Supply Chain)" << std::endl;
         throw std::runtime_error("");
     }
 
@@ -199,6 +219,15 @@ std::string decode_alternative_name_formulation(const std::string& model_type) {
     alternatives_map["cooperative recon"] = "recon";
     alternatives_map["cooperativerecon"] = "recon";
     alternatives_map["navigation"] = "navigation";
+    alternatives_map["bin packing"] = "binpacking";
+    alternatives_map["bp"] = "binpacking";
+    alternatives_map["ks"] = "knapsack";
+    alternatives_map["travellingsalesperson"] = "tsp";
+    alternatives_map["travelling salesperson"] = "tsp";
+    alternatives_map["travelling salesman"] = "tsp";
+    alternatives_map["travellingsalesman"] = "tsp";
+    alternatives_map["supplychain"] = "sc";
+    alternatives_map["supply chain"] = "sc";
 
     //model type to lowercase
     std::string model_type_lower = model_type;
@@ -294,7 +323,9 @@ ABS::Model* getModel(std::string model_type, const std::vector<std::string>& m_a
                 std::string agent_type = agent.substr(pos+1);
                 int agent_player = std::stoi(agent.substr(0,pos));
                 Agent* agent_obj;
-                if (agent_type == "random")
+                if (agent_type == "mcts")
+                    agent_obj = new Mcts::MctsAgent({500, "iterations"});
+                else if (agent_type == "random")
                     agent_obj = new RandomAgent();
                 else if (agent_type == "osla")
                     agent_obj = new OSLA::OneStepLookaheadAgent();
@@ -312,8 +343,47 @@ ABS::Model* getModel(std::string model_type, const std::vector<std::string>& m_a
         int player = std::stoi(model_args["player"]);
         bool deterministic_opponents = model_args.contains("deterministic_opponents") ? std::stoi(model_args["deterministic_opponents"]) : false;
 
-        model = new MPTOMDP::Model(ground_model, agents, discount, player, deterministic_opponents);
+        model = new MPTOMDP::Model(ground_model, agents, discount, player, deterministic_opponents, true);
 
+    } else if (model_type == "num"){
+        int goal = std::stoi(model_args["goal"]);
+        int max_action = std::stoi(model_args["max_action"]);
+        bool zero_sum = std::stoi(model_args["zero_sum"]);
+        bool one_hot_obs = model_args.contains("one_hot_obs") ? std::stoi(model_args["one_hot_obs"]) : false;
+        model = new NUM::Model(goal,max_action,zero_sum,one_hot_obs);
+    } else if (model_type == "che"){
+        bool zero_sum = std::stoi(model_args["zero_sum"]);
+        model = new CHE::Model(zero_sum);
+    } else if (model_type == "con"){
+        bool zero_sum = std::stoi(model_args["zero_sum"]);
+        model = new CON::Model(std::stoi(model_args["arena_size"]), zero_sum);
+    }else if (model_type == "pyl"){
+        bool zero_sum = std::stoi(model_args["zero_sum"]);
+        model = new PYL::Model(zero_sum);
+    } else if (model_type == "qua"){
+        bool zero_sum = std::stoi(model_args["zero_sum"]);
+        model = new QUA::Model(zero_sum);
+    }
+    else if (model_type == "ct") {
+        bool idle_action = model_args.contains("idle_action") ? std::stoi(model_args["idle_action"]) : true;
+        model =  new CT::Model(std::stoi(model_args["width"]), std::stoi(model_args["height"]), std::stof(model_args["spawn_rate"]), idle_action);
+    }
+    else if (model_type == "mab") {
+        int arm_copies = std::stoi(model_args["repeats"]);
+        std::vector<std::pair<double,double>> arm_distributions = {};
+        std::stringstream ss(model_args["means"]);
+        std::stringstream ss2(model_args["stds"]);
+        double i;
+        while (ss >> i){
+            double j;
+            ss2 >> j;
+            arm_distributions.emplace_back(i, j);
+            if (ss.peek() == ';')
+                ss.ignore();
+            if (ss2.peek() == ';')
+                ss2.ignore();
+        }
+        model =  new MAB::Model(arm_distributions,arm_copies);
     }
     else if (model_type == "pushyl") {
         auto map = resolve_file_path(model_args["map"], "resources/DiceProbs");
@@ -358,6 +428,16 @@ ABS::Model* getModel(std::string model_type, const std::vector<std::string>& m_a
         bool idle_action = model_args.contains("idle_action") ? std::stoi(model_args["idle_action"]) : false;
         bool reduced_action_space = model_args.contains("reduced_action_space") ? std::stoi(model_args["reduced_action_space"]) : true;
         model = new ST::SkillsTeachingModel(map,idle_action, reduced_action_space);
+    }else if(model_type == "trt") {
+        auto map = resolve_file_path(model_args["map"], "resources/TriangleTireworlds");
+        bool idle_action = model_args.contains("idle_action") ? std::stoi(model_args["idle_action"]) : false;
+        bool reduced_action_space = model_args.contains("reduced_action_space") ? std::stoi(model_args["reduced_action_space"]) : true;
+        bool big_payoff = model_args.contains("big_payoff") ? std::stoi(model_args["big_payoff"]) : true;
+        model = new TRT::Model(map,idle_action, reduced_action_space, big_payoff);
+    }
+    else if (model_type == "ttt") {
+        bool zero_sum = std::stoi(model_args["zero_sum"]);
+        model =  new TTT::Model(zero_sum);
     }else if (model_type == "pus") {
         auto map = resolve_file_path(model_args["map"], "resources/PusherMaps");
         bool zero_sum = std::stoi(model_args["zero_sum"]);
@@ -371,6 +451,16 @@ ABS::Model* getModel(std::string model_type, const std::vector<std::string>& m_a
         bool zero_sum = std::stoi(model_args["zero_sum"]);
         model =  new OTH::Model(zero_sum);
     }
+    else if (model_type == "ktk") {
+        auto map = resolve_file_path(model_args["map"], "resources/KTKMaps");
+        bool zero_sum = std::stoi(model_args["zero_sum"]);
+        model =  new KTK::Model(zero_sum,map);
+    }
+    else if (model_type == "ctf") {
+        auto map = resolve_file_path(model_args["map"], "resources/CTFMaps");
+        bool zero_sum = std::stoi(model_args["zero_sum"]);
+        model =  new CTF::Model(zero_sum, map);
+    }
     else if (model_type == "sa") {
         auto map = resolve_file_path(model_args["map"], "resources/SysAdminTopologies");
         model = new SA::Model(map);
@@ -382,6 +472,13 @@ ABS::Model* getModel(std::string model_type, const std::vector<std::string>& m_a
     else if (model_type == "sw") {
         bool deterministic = model_args.contains("deterministic") ? std::stoi(model_args["deterministic"]) : false;
         model =  new SW::Model(std::stoi(model_args["size"]), std::stoi(model_args["size"]), deterministic);
+    }
+    else if (model_type == "rt") {
+        auto map = resolve_file_path(model_args["map"], "resources/Racetracks");
+        bool reset_at_crash = model_args.contains("reset_at_crash") ? std::stoi(model_args["reset_at_crash"]) : false;
+        double fail_prob = model_args.contains("fail_prob") ? std::stod(model_args["fail_prob"]) : 0.0;
+        bool simplified_observation = model_args.contains("simplified_observation_space") ? std::stoi(model_args["simplified_observation_space"]) : false;
+        model =  new RT::Model(map, fail_prob, reset_at_crash, simplified_observation);
     }
     else if (model_type == "gol") {
         auto map = resolve_file_path(model_args["map"], "resources/GameOfLifeMaps");
@@ -399,11 +496,18 @@ ABS::Model* getModel(std::string model_type, const std::vector<std::string>& m_a
             }
         }
         model =  new GOL::Model(map,action_mode);
+    } else if (model_type == "j5") {
+        model =  new J5::Model(std::stoi(model_args["joint"]), true, std::stoi(model_args["decoupled_action_space"]));
     }
     else if (model_type == "aa") {
         auto map = resolve_file_path(model_args["map"], "resources/AcademicAdvisingCourses");
         bool idle_action = model_args.contains("idle_action") ? std::stoi(model_args["idle_action"]) : false;
         model =  new AA::Model(map, std::stoi(model_args["dense_rewards"]), idle_action);
+    }
+    else if (model_type == "navigation") { //
+        auto map = resolve_file_path(model_args["map"], "resources/NavigationMaps");
+        bool idle_action = model_args.contains("idle_action") ? std::stoi(model_args["idle_action"]) : false;
+        model =  new Navigation::Model(map,idle_action);
     }
     else if (model_type == "ts") {
         model =  new TS::Model();
@@ -411,6 +515,22 @@ ABS::Model* getModel(std::string model_type, const std::vector<std::string>& m_a
         int price = std::stoi(model_args["p"]);
         int time = std::stoi(model_args["t"]);
         model =  new SAVING::Model(-price,price,time,time);
+    }
+    else if (model_type == "binpacking") {
+        std::string fileName = resolve_file_path(model_args["setup"], "resources/BinPackingSetups");
+        model = new BIN_PACKING::Model(fileName);
+    }
+    else if (model_type == "knapsack") {
+        std::string fileName = resolve_file_path(model_args["setup"], "resources/KnapsackSetups");
+        model = new KNAPSACK::Model(fileName);
+    }
+    else if (model_type == "tsp") {
+        std::string fileName = resolve_file_path(model_args["map"], "resources/TravellingSalesPersonMaps");
+        model = new TRAVELLING_SALES_PERSON::Model(fileName);
+    }
+    else if (model_type == "sc") {
+        std::string filePath = resolve_file_path(model_args["setup"], "resources/SupplyChainSetups");
+        model = new SUPPLY_CHAIN::Model(filePath);
     }
 
     assert (model != nullptr);
