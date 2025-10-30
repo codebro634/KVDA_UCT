@@ -5,6 +5,22 @@
 
 This is the repository accompanying the paper "Grouping nodes with known value differences: A lossless UCT-based abstraction algorithm" which contains the code to reproduce the experiments and the results of the paper.
 
+## Cite this work
+
+If you use this work, please cite it as:
+
+```bibtex
+@misc{kvdauct,
+      title={Grouping Nodes With Known Value Differences: A Lossless UCT-based Abstraction Algorithm}, 
+      author={Robin Schmöcker and Alexander Dockhorn and Bodo Rosenhahn},
+      year={2025},
+      eprint={2510.25388},
+      archivePrefix={arXiv},
+      primaryClass={cs.AI},
+      url={https://arxiv.org/abs/2510.25388}, 
+}
+```
+
 ## Abstract
 
 A core challenge of Monte Carlo Tree Search (MCTS) is its sample efficiency,
