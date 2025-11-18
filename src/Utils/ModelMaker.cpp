@@ -244,7 +244,8 @@ ABS::Model* getModel(std::string model_type, const std::vector<std::string>& m_a
         //split at '='
         auto pos = arg.find('=');
         if (pos == std::string::npos) {
-            throw std::runtime_error("Invalid agent argument");
+            std::cout << "Invalid model argument: " << arg << ". It must be of the form arg_name=arg_val" << std::endl;
+            return nullptr;
         }
         model_args[arg.substr(0, pos)] = arg.substr(pos + 1);
     }
