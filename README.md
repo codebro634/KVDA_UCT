@@ -13,8 +13,10 @@ If you use this work, please cite it as:
 @inproceedings{kvdauct,
       title={Grouping Nodes With Known Value Differences: A Lossless UCT-based Abstraction Algorithm}, 
       author={Robin Schmöcker and Alexander Dockhorn and Bodo Rosenhahn},
+      booktitle={The Fourteenth International Conference on Learning Representations, {ICLR} 2026, Brazil, April 23-27, 2026},
+      publisher={OpenReview.net},
       year={2026},
-      booktitle = {Proceedings of the International Conference on Learning Representations}
+      url={https://openreview.net/forum?id=Zk0zZMSAYc},
 }
 ```
 
