@@ -10,13 +10,15 @@ This is the repository accompanying the paper "Grouping nodes with known value d
 If you use this work, please cite it as:
 
 ```bibtex
-@inproceedings{kvdauct,
-      title={Grouping Nodes With Known Value Differences: A Lossless UCT-based Abstraction Algorithm}, 
-      author={Robin Schmöcker and Alexander Dockhorn and Bodo Rosenhahn},
-      booktitle={The Fourteenth International Conference on Learning Representations, {ICLR} 2026, Brazil, April 23-27, 2026},
-      publisher={OpenReview.net},
-      year={2026},
-      url={https://openreview.net/forum?id=Zk0zZMSAYc}
+@inproceedings{ICLR2026_09f9cbe5,
+ author = {Schm\"{o}cker, Robin and Dockhorn, Alexander and Rosenhahn, Bodo},
+ booktitle = {International Conference on Learning Representations},
+ editor = {C. Vondrick and B. Hariharan and C. Raffel and L. Pinto and D. Yang and A. Faust},
+ pages = {5440--5459},
+ title = {Grouping Nodes with known Value Differences: A lossless UCT-based Abstraction Algorithm},
+ url = {https://proceedings.iclr.cc/paper_files/paper/2026/file/09f9cbe5424d0479b798f4a3dab3a75d-Paper-Conference.pdf},
+ volume = {2026},
+ year = {2026}
 }
 ```
 
